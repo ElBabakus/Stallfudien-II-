@@ -64,8 +64,7 @@ X <- cbind(
 )
 
 
-
-## Visual Check: Plot all the desnity functions. Are all spaces evenly covered?
+# Visualisation
 
 curve(dlnorm(x, meanlog = lognormal_params(11000,1650)$mu, 
              sdlog = lognormal_params(11000,1650)$sigma), from = 0, to = 20000
@@ -129,7 +128,6 @@ points(x = X[,7], y = dlnorm(X[,7], meanlog = lognormal_params(400834.671490699,
 
 
 
-# Suggestion for submission of sample data:
 colnames(X) = c("sigma_mem_y", "f_mem", "sigma_mem", 
                 "E_mem", "nu_mem", "sigma_edg", "sigma_sup")
 rownames(X) = 1:200
