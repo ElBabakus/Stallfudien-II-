@@ -16,32 +16,47 @@ setwd("C:/Users/ferry/OneDrive/Dokumente/__UNI/9. Semester/Stallfudien 2/Projekt
 ##  Fragestellung: accuraly of the surrogate model
 # test different kernel and basis functions
 
-# Kernels
+##  erstelle Ergebnis DF
 kernels <- c("Gaussian", "Matern12", "Matern32", "Matern52", "RQ")
 
 # Basisfunktionen PREP 
 bf1 <- function(x) x
-bf2 <- function(x) x^2
-bf3 <- function(x) c(x, x^2)
-bf4 <- function(x){
+bf2 <- function(x) c(1,x)
+bf3 <- function(x) x^2
+bf4 <- function(x) c(1,x^2)
+bf5 <- function(x) c(x,x^2)
+bf6 <- function(x) c(1,x,x^2)
+bf7 <- function(x){
   out <- x
   n <- length(x)
   for(i in 1:n){
-    for(j in 1:n){
+    for(j in i:n){
       out <- c(out, x[i]*x[j])
     }
   }
   out
 }
-bf5 <- function(x) c(1,x)
-bf6 <- function(x) c(1,x^2)
-bf7 <- function(x) c(1,x,x^2)
+bf8 <- function(x){
+  out <- c(1,x)
+  n <- length(x)
+  for(i in 1:n){
+    for(j in i:n){
+      out <- c(out, x[i]*x[j])
+    }
+  }
+  out
+}
+bf9 <- function(x) log(x)
+bf10 <- function(x) c(1, log(x))
+bf11 <- function(x) sqrt(x)
+bf12 <- function(x) c(1, sqrt(x))
 
-bfs <- c(bf1, bf2, bf3, bf4, bf5, bf6, bf7)
+bfs <- c(bf1, bf2, bf3, bf4, bf5, bf6, bf7, bf8, bf9, bf10, bf11, bf12)
 
-MSPEs <- Bias <- data.frame(matrix(NA, 7, 5))
+MSPEs <- Bias <- data.frame(matrix(NA, 12, 5))
 colnames(MSPEs) <-  colnames(Bias) <-  kernels
-rownames(MSPEs) <- rownames(Bias) <- c("bf1", "bf2", "bf3", "bf4", "bf5", "bf6", "bf7")
+rownames(MSPEs) <- rownames(Bias) <- c("bf1", "bf2", "bf3", "bf4", "bf5", "bf6", 
+                                       "bf7", "bf8", "bf9", "bf10", "bf11", "bf12")
 
 
 ## Data Prep
@@ -49,7 +64,13 @@ data <- readxl::read_excel("Design of Experiments_out.xlsx")
 data <- as.matrix(data)
 
 dat <- data[, 2:7]
-dat <- scale(dat)
+# scaling of data
+#f_mem kann so bleiben
+dat[,"sigma_mem"] <- dat[,"sigma_mem"]/1000 #umwandeln in MPa
+dat[,"E_mem"] <- dat[,"E_mem"] / 1000000 #umwandeln in GPa
+#nu_mem kann so bleiben
+dat[,"sigma_edg"] <- dat[,"sigma_edg"] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
+dat[,"sigma_sup"] <- dat[,"sigma_sup"] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
 
 X <- dat 
 y <- data[,8]
