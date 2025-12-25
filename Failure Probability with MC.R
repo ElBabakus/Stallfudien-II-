@@ -1,5 +1,6 @@
 library(rkriging)
-library(ordinal)
+library(evd)
+setwd("C:/Users/ferry/OneDrive/Dokumente/__UNI/9. Semester/Stallfudien 2/Projekt 2")
 
 #### lade Daten -------------------------------------------
 
@@ -34,7 +35,13 @@ data <- readxl::read_excel("Design of Experiments_out.xlsx")
 data <- as.matrix(data)
 
 dat <- data[, 2:7]
-dat <- scale(dat)
+# scaling of data
+#f_mem kann so bleiben
+dat[,"sigma_mem"] <- dat[,"sigma_mem"]/1000 #umwandeln in MPa
+dat[,"E_mem"] <- dat[,"E_mem"] / 1000000 #umwandeln in GPa
+#nu_mem kann so bleiben
+dat[,"sigma_edg"] <- dat[,"sigma_edg"] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
+dat[,"sigma_sup"] <- dat[,"sigma_sup"] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
 
 X <- dat 
 y <- data[,8]
@@ -42,7 +49,7 @@ p <- 6
 
 #### Modell Fitten ----------------------------------------
 
-## mit dem besten Model und der besten Basisfunktion: Matern52 + function(x) x^2
+## mit dem besten Model und der besten Basisfunktion bf3: Matern52 + function(x) x^2
 kernel.parameters <- list(
   type = "Matern52",
   lengthscale = rep(1, 6), # initial value
@@ -75,16 +82,17 @@ for(k in 1:200) {
 }
 
 ## MSPE
-mean((y - Pred)^2)
+mean((y - Pred)^2) # 77.35707
 
 ## Bias
-mean(y - Pred)
+mean(y - Pred) # -0.01867302
 
 
 #### Fehlerwkt schätzen -----------------------------------
 n <- 1e7
 
 ## ziehe fuer jede Variable n Zufallszahlen
+set.seed(25122025)
 X_star <- cbind(
   rgumbel(n, loc = gumbel_params(0.4, 0.12)$mu,
           scale = gumbel_params(0.4, 0.12)$beta),
@@ -100,18 +108,41 @@ X_star <- cbind(
          sdlog = lognormal_params(400834.671490699, 80166.9342981399)$sigma)
 )
 
+# scaling of data
+#f_mem kann so bleiben
+X_star[,2] <- X_star[,2]/1000 #umwandeln in MPa
+X_star[,3] <- X_star[,3] / 1000000 #umwandeln in GPa
+#nu_mem kann so bleiben
+X_star[,5] <- X_star[,5] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
+X_star[,6] <- X_star[,6] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
 
-## teile X_star spaltenweise durch das maximum der erhobenen Daten (NO)
-# X_star <- sweep(X_star, 2, STATS = maximums, FUN = "/")
-X_star <- scale(X_star)
 
 ## ziehe n mal den maximal erlaubten stress
+set.seed(25122025)
 sigma_mem_y <- rlnorm(n, meanlog = lognormal_params(11000,1650)$mu,
                       sdlog = lognormal_params(11000,1650)$sigma)
 
 ## berechne den output an den stellen X_star
 f_star <- Predict.Kriging(mod, X_star)$mean
-hist(f_star, breaks=100)
+
+par(cex.axis = 1.5)
+par(cex.lab = 1.5)
+par(mar = c(5,7,2,2))
+hist(f_star, breaks=100, main = "", xlab = "kPa", ylab =  expression(sigma[mem_max]),
+     freq = FALSE, xlim = c(4000, 18000), ylim = c(0,7e-4), yaxs = "i", col = "grey")
+  curve(dlnorm(x, meanlog = lognormal_params(11000,1650)$mu, 
+             sdlog = lognormal_params(11000,1650)$sigma), from = 0, to = 20000
+      , col = "red", lwd = 1.5, add = TRUE)
+legend(
+  x = 14539.43,
+  y = 0.0006674010,
+  legend = expression(sigma[mem_y]),
+  col = "red",
+  lwd = 1.5,
+  bty = "n",
+  cex = 1.5
+)
+box()
 
 ## wie oft ist der output größer als erlaubt?
 mean(f_star > sigma_mem_y)
