@@ -17,7 +17,7 @@ setwd("C:/Users/ferry/OneDrive/Dokumente/__UNI/9. Semester/Stallfudien 2/Projekt
 # test different kernel and basis functions
 
 ##  erstelle Ergebnis DF
-kernels <- c("Gaussian", "Matern12", "Matern32", "Matern52", "RQ")
+kernels <- c("Gaussian", "Matern12", "Matern32", "Matern52", "RQ", "RQ", "RQ")
 
 # Basisfunktionen PREP 
 bf1 <- function(x) x
@@ -79,6 +79,12 @@ p <- 6
 ## (Fruit) Loop
 for(i in 1:length(bfs)){
   for(j in kernels){
+    # setze Parameter fuer RQ Kernel
+    if(j %in% 1:4) a <- 0
+    if(j == 5) a <- 0.5 
+    if(j == 6) a <- 1 
+    if(j == 7) a <- 2 
+    
     kernel.parameters <- list(
       type = j,
       lengthscale = rep(1, 6), # initial value
