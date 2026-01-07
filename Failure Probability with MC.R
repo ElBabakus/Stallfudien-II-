@@ -68,24 +68,6 @@ l
 ## Update kernel.parameters
 kernel.parameters$lengthscale <- mod$get_lengthscale()
 
-#### Kreuvalidierung --------------------------------------
-Pred <- numeric(200)
-for(k in 1:200) {
-  mod <- Universal.Kriging(X[-k, ], y[-k], basis.function = basis.function,
-                           kernel.parameters = kernel.parameters,
-                           nlopt.parameters = list(maxeval = 1000))
-  
-  Pred[k] <- Predict.Kriging(mod, t(X[k, ]))$mean
-  
-  if(k%%20 == 0) print(paste0("at ", Sys.time(), ", k = ", k))
-}
-
-## MSPE
-mean((y - Pred)^2) # 77.35707
-
-## Bias
-mean(y - Pred) # -0.01867302
-
 
 #### Fehlerwkt schätzen -----------------------------------
 n <- 1e7
@@ -144,8 +126,11 @@ legend(
 box()
 
 ## wie oft ist der output größer als erlaubt?
-mean(f_star > sigma_mem_y)
+P_f <- mean(f_star > sigma_mem_y)
+P_f
 
+## Monte-Carlo SE
+sqrt(P_f*(1-P_f)/n)
 
 ## TODO Montecarlo Fehler berechnen -> dabei kommt es mMn darauf an wie y
 ##      skaliert ist
