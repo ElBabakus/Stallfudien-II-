@@ -62,11 +62,13 @@ mod <- Universal.Kriging(X, y, basis.function = basis.function,
                          kernel.parameters = kernel.parameters,
                          nlopt.parameters = list(maxeval = 1000)
 )
+## lengthscale Parameter
 l <- mod$get_lengthscale()
 l
 
-## Update kernel.parameters
-kernel.parameters$lengthscale <- mod$get_lengthscale()
+## Varianz des Modells
+var_mod <- mod$get_nu2()
+var_mod
 
 
 #### Fehlerwkt schätzen -----------------------------------
