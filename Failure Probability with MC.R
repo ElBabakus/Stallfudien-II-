@@ -64,11 +64,11 @@ mod <- Universal.Kriging(X, y, basis.function = basis.function,
 )
 ## lengthscale Parameter
 l <- mod$get_lengthscale()
-l
+l # 2.4367983 7.5658388 3.4021912 2.2937297 0.8357835 2.6090562
 
 ## Varianz des Modells
 var_mod <- mod$get_nu2()
-var_mod
+var_mod # 6747891
 
 
 #### Fehlerwkt schätzen -----------------------------------
@@ -129,10 +129,7 @@ box()
 
 ## wie oft ist der output größer als erlaubt?
 P_f <- mean(f_star > sigma_mem_y)
-P_f
+P_f # 0.0000936
 
 ## Monte-Carlo SE
-sqrt(P_f*(1-P_f)/n)
-
-## TODO Montecarlo Fehler berechnen -> dabei kommt es mMn darauf an wie y
-##      skaliert ist
+sqrt(P_f*(1-P_f)/n) # 0.000003059269
