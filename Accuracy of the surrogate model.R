@@ -69,8 +69,8 @@ dat <- data[, 2:7]
 dat[,"sigma_mem"] <- dat[,"sigma_mem"]/1000 #umwandeln in MPa
 dat[,"E_mem"] <- dat[,"E_mem"] / 1000000 #umwandeln in GPa
 #nu_mem kann so bleiben
-dat[,"sigma_edg"] <- dat[,"sigma_edg"] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
-dat[,"sigma_sup"] <- dat[,"sigma_sup"] / 1000000 #umwandeln in GPa (ist in der Tabelle mir MPa angegeben!)
+dat[,"sigma_edg"] <- dat[,"sigma_edg"] / 1000000 #umwandeln in GPa (ist in der Tabelle mit MPa angegeben!)
+dat[,"sigma_sup"] <- dat[,"sigma_sup"] / 1000000 #umwandeln in GPa (ist in der Tabelle mit MPa angegeben!)
 
 X <- dat 
 y <- data[,8]
@@ -124,3 +124,4 @@ for(i in 1:length(bfs)){
 }
 
 save(MSPEs, Bias, file = "Accuracy Results.RData")
+
