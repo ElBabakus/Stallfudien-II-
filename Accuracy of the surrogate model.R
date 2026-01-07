@@ -1,15 +1,8 @@
 # Preamble:
 
-library(plotly)
-library(rgl)
-library(evd)
-library(randtoolbox)
-library(lhs)
-library(DiceDesign)
-library(writexl)
 library(readxl)
 library(rkriging)
-setwd("C:/Users/ferry/OneDrive/Dokumente/__UNI/9. Semester/Stallfudien 2/Projekt 2")
+
 ################################################################################
 
 
@@ -53,7 +46,7 @@ bf12 <- function(x) c(1, sqrt(x))
 
 bfs <- c(bf1, bf2, bf3, bf4, bf5, bf6, bf7, bf8, bf9, bf10, bf11, bf12)
 
-MSPEs <- Bias <- data.frame(matrix(NA, 12, 5))
+MSPEs <- Bias <- data.frame(matrix(NA, 12, 7))
 colnames(MSPEs) <-  colnames(Bias) <-  kernels
 rownames(MSPEs) <- rownames(Bias) <- c("bf1", "bf2", "bf3", "bf4", "bf5", "bf6", 
                                        "bf7", "bf8", "bf9", "bf10", "bf11", "bf12")
