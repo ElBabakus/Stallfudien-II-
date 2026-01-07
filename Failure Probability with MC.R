@@ -1,6 +1,5 @@
 library(rkriging)
 library(evd)
-setwd("C:/Users/ferry/OneDrive/Dokumente/__UNI/9. Semester/Stallfudien 2/Projekt 2")
 
 #### lade Daten -------------------------------------------
 
