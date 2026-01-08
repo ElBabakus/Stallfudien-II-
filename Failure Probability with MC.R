@@ -1,5 +1,6 @@
 library(rkriging)
 library(evd)
+setwd("C:/Users/ferry/OneDrive/Dokumente/__UNI/9. Semester/Stallfudien 2/Projekt 2")
 
 #### lade Daten -------------------------------------------
 
@@ -62,13 +63,29 @@ mod <- Universal.Kriging(X, y, basis.function = basis.function,
                          kernel.parameters = kernel.parameters,
                          nlopt.parameters = list(maxeval = 1000)
 )
-## lengthscale Parameter
 l <- mod$get_lengthscale()
-l # 2.4367983 7.5658388 3.4021912 2.2937297 0.8357835 2.6090562
+l
 
-## Varianz des Modells
-var_mod <- mod$get_nu2()
-var_mod # 6747891
+## Update kernel.parameters
+kernel.parameters$lengthscale <- mod$get_lengthscale()
+
+#### Kreuvalidierung --------------------------------------
+Pred <- numeric(200)
+for(k in 1:200) {
+  mod <- Universal.Kriging(X[-k, ], y[-k], basis.function = basis.function,
+                           kernel.parameters = kernel.parameters,
+                           nlopt.parameters = list(maxeval = 1000))
+  
+  Pred[k] <- Predict.Kriging(mod, t(X[k, ]))$mean
+  
+  if(k%%20 == 0) print(paste0("at ", Sys.time(), ", k = ", k))
+}
+
+## MSPE
+mean((y - Pred)^2) # 77.35707
+
+## Bias
+mean(y - Pred) # -0.01867302
 
 
 #### Fehlerwkt schätzen -----------------------------------
@@ -111,25 +128,28 @@ f_star <- Predict.Kriging(mod, X_star)$mean
 par(cex.axis = 1.5)
 par(cex.lab = 1.5)
 par(mar = c(5,7,2,2))
-hist(f_star, breaks=100, main = "", xlab = "kPa", ylab =  expression(sigma[mem_max]),
+hist(f_star, breaks=100, main = "", xlab = "kPa", ylab =  "Density",
      freq = FALSE, xlim = c(4000, 18000), ylim = c(0,7e-4), yaxs = "i", col = "grey")
   curve(dlnorm(x, meanlog = lognormal_params(11000,1650)$mu, 
              sdlog = lognormal_params(11000,1650)$sigma), from = 0, to = 20000
       , col = "red", lwd = 1.5, add = TRUE)
 legend(
-  x = 14539.43,
+  x = 13039.43,
   y = 0.0006674010,
-  legend = expression(sigma[mem_y]),
+  legend = expression(sigma[paste(mem,",",y)]),
   col = "red",
   lwd = 1.5,
   bty = "n",
-  cex = 1.5
-)
+  cex = 1.5)
 box()
 
 ## wie oft ist der output größer als erlaubt?
 P_f <- mean(f_star > sigma_mem_y)
-P_f # 0.0000936
 
-## Monte-Carlo SE
-sqrt(P_f*(1-P_f)/n) # 0.000003059269
+
+#### Monte-Carlo-Standardfehler berechnen:
+
+# Da f_star und sigma_mem_y unabhängig voneinander gesamplet wurden, ist 
+# X_i 1_{(f_star)_i > (sigma_mem_y)_i} ~ Ber(P_f)
+# -> Summe X_i ~ Bin(n, P_f) (aber nur approximativ, da X_i nicht identisch verteilt)
+MCSE <- sqrt(P_f * (1-P_f)/ n)
